@@ -74,8 +74,9 @@ Table: Resources and tools developed or extended during BioHackathon 2026.
 ## What was published
 
 The gene, expression and literature data served by MarpolBase were converted to RDF and
-released. The SPARQL endpoint was registered with both TogoMCP and RDF Portal, so
-MarpolBase can now be reached from the cross-database query tooling maintained in Japan.
+released. The SPARQL endpoint was registered with both TogoMCP
+[@usesMethodIn:Kinjo2026] and RDF Portal, so MarpolBase can now be reached from the
+cross-database query tooling maintained in Japan.
 On top of the endpoint we built an MCP server with 14 tools, which lets an LLM agent
 query the resource without writing SPARQL by hand.
 

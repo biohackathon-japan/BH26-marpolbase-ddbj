@@ -61,8 +61,8 @@ AI エージェントから利用できるようにした。
 ## 公開したもの
 
 MarpolBase が提供する遺伝子情報・発現情報・文献情報を RDF に変換して公開した。SPARQL
-エンドポイントは TogoMCP と RDF Portal の双方に登録したため、国内で整備されている
-データベース横断のクエリ環境から MarpolBase に到達できるようになった。さらにエンドポイントの
+エンドポイントは TogoMCP (Kinjo et al., 2026) と RDF Portal の双方に登録したため、国内で
+整備されているデータベース横断のクエリ環境から MarpolBase に到達できるようになった。さらにエンドポイントの
 上に 14 個のツールを持つ MCP サーバを構築し、LLM エージェントが SPARQL を自分で書かずに
 このリソースを検索できるようにした。
 
@@ -165,6 +165,10 @@ SPARQL ではなく自然言語のプロンプトから駆動している。型�
 - Ikeda S, Ono H, Ohta T, et al. TogoID: an exploratory ID converter to bridge
   biological datasets. *Bioinformatics* 2022;38(17):4194-4199.
   <https://doi.org/10.1093/bioinformatics/btac491>
+- Kinjo AR, Yamamoto Y, Bustamante-Larriet S, Labra-Gayo JE, Fujisawa T. TogoMCP:
+  natural language querying of life-science knowledge graphs via schema-guided LLMs and
+  the Model Context Protocol. *Database* 2026;2026:baag042.
+  <https://doi.org/10.1093/database/baag042>
 
 ## 謝辞
 
