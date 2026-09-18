@@ -1,24 +1,22 @@
 ---
-title: 'DBCLS BioHackathon 2026 report: Template for the very long title'
-title_short: 'BioHackJP26: How we found breakfast'
+title: 'DBCLS BioHackathon 2026 report: A knowledge base for the Marchantia genome database MarpolBase, and AI-assisted tools for DDBJ submission'
+title_short: 'BioHackJP26: MarpolBase RDF/MCP and DDBJ submission agents'
 tags:
   - Semantic web
-  - Ontologies
-  - Workflows
+  - RDF
+  - Model Context Protocol
+  - Marchantia polymorpha
+  - DDBJ
 authors:
-  - name: First Author
+  - name: Yasuhiro Tanizawa
     affiliation: 1
-    role: Writing – original draft
-  - name: Last Author
-    orcid: 0000-0000-0000-0000
-    affiliation: 2
-    role: Conceptualization, Writing – review & editing
+    role: Conceptualization, Software, Writing – original draft
+  - name: Takatomo Fujisawa
+    affiliation: 1
+    role: Software, Writing – review & editing
 affiliations:
-  - name: First Affiliation
+  - name: Bioinformation and DDBJ Center, National Institute of Genetics, Japan
     index: 1
-  - name: ELIXIR Europe
-    ror: 044rwnt51
-    index: 2
 date: 18 September 2026
 cito-bibliography: paper.bib
 event: BH26JP
@@ -30,239 +28,224 @@ group: marpolbase-ddbj
 git_url: https://github.com/biohackathon-japan/BH26-marpolbase-ddbj
 # This is the short authors description that is used at the
 # bottom of the generated paper (typically the first two authors):
-authors_short: First Author \emph{et al.}
+authors_short: Tanizawa \& Fujisawa
 ---
 
 
 # Introduction
 
-As part of the DBCLS BioHackathon 2026, we here report...
+Our group worked on two loosely coupled goals during the DBCLS BioHackathon 2026.
 
-## Meeting information
+The first was to turn **MarpolBase** [@citesAsDataSource:Tanizawa2025], the genome database of
+the liverwort *Marchantia polymorpha* [@citesAsDataSource:Bowman2017], into a knowledge base: to publish its gene, expression and
+literature data as RDF, to expose them through a SPARQL endpoint, and to make them
+reachable from AI agents through a Model Context Protocol (MCP) server.
 
-If you want to submit a preprint to BioHackrXiv, first check if your meeting is registered. You can find a list
-of meetings [here](https://index.biohackrxiv.org/meetings). If your meeting is missing, please contact your meeting
-organizers. The above list also provides information on the YAML fields with information about the meeting.
+The second was to lower the cost of **depositing data in DDBJ**. Preparing a DDBJ
+submission file is still largely manual work, and the two side projects reported here —
+DFAST-Agent and MARKit — attack that problem from two directions: an agent that
+assembles submission files through dialogue with the user, and a tool that builds and
+checks marker-sequence submissions mechanically.
 
-The following fields need to be given:
+Table 1 lists what was produced.
 
-```YAML
-biohackathon_name: "DBCLS BioHackathon 2026"
-biohackathon_url:   "https://2026.biohackathon.org/"
-biohackathon_location: "Matsuyama, Japan, 2026"
-group: YOUR-PROJECT-NAME-GOES-HERE
-git_url: https://github.com/yourOrganization/your_report_repo
-```
+Table: Resources and tools developed or extended during BioHackathon 2026.
 
-The [BioHackrXiv meeting pages](https://index.biohackrxiv.org/meetings) provide content to use for the first
-three fields. The `git_url:` field must have the link to the GitHub repository with your preprint (draft).
+| Name | Description and URL |
+| ---------------------- | ---------------------------------------------------------- |
+| MarpolBase RDF | RDF distribution of the MarpolBase gene, expression and literature data. <https://marchantia.info/rdf/> |
+| MarpolBase SPARQL endpoint | Public endpoint, registered with TogoMCP and RDF Portal. <https://marchantia.info/sparql> |
+| MarpolBase MCP server | 14 tools giving agents typed access to genes, expression, co-expression and literature. <https://marchantia.info/mcp> |
+| dfast-agent-p | Agent that builds DDBJ submission files for prokaryotic genomes via the DFAST API. <https://github.com/nigyta/dfast-agent-p> |
+| DFAST-Agent (eukaryote) | GFF-to-DDBJ conversion agent; a web interface backed by a local LLM is also being developed. In development. |
+| MARKit | Marker Annotation and Registration Kit, distributed as the container `nigyta/markit:latest`. <https://ggs-staging.ddbj.nig.ac.jp/tools/markit> |
 
-## Author information
+# MarpolBase RDF and MCP server
 
-Information about the authors is given in the [YAML](https://en.wikipedia.org/wiki/YAML) format at the top of this template.
-For authors you provide their names, their affiliations. That is the minimum, but as BioHackrXiv is moving to a situation
-where more metadata is shared, and used by, for example, EuropePMC, adding additional information ie encouraged.
+## What was published
 
-BioHackathons is about hacking together, and the minimal number of authors for reports is two. This makes a minimal example
-look like this:
+The gene, expression and literature data served by MarpolBase were converted to RDF and
+released. The SPARQL endpoint was registered with both TogoMCP and RDF Portal, so
+MarpolBase can now be reached from the cross-database query tooling maintained in Japan.
+On top of the endpoint we built an MCP server with 14 tools, which lets an LLM agent
+query the resource without writing SPARQL by hand.
 
-```yaml
-authors:
-  - name: First Author
-    affiliation: 1
-  - name: Last Author
-    affiliation: 2
-affiliations:
-  - name: First Affiliation
-    index: 1
-  - name: ELIXIR Europe
-    index: 2
-```
+The tools fall into five groups: gene lookup and search, expression profiles and
+condition comparison, co-expression networks, curated gene–literature links, and
+controlled-vocabulary resolution. A `run_sparql` tool and a `describe_schema` tool are
+also provided so that an agent can fall back to raw SPARQL when the typed tools are not
+enough.
 
-### Author identifiers
+## Use cases
 
-Ideally, authors provide their [ORCID](https://orcid.org/) identifier. For affiliations, It is added with the `orcid:` field.
-So, and author record would look like this:
+We exercised the server with two analyses driven entirely from natural-language prompts.
 
-```yaml
-authors:
-  - name: First Author
-    affiliation: 1
-    orcid: 0000-0000-0000-0000
-```
+In the first (Figure \ref{fig1}), the prompt *"tell me the conditions in which MpBNB is
+highly expressed"* was answered by retrieving the mean TPM of `MpBNB` across all 161
+conditions in MarpolBase, together with the condition attributes (tissue, accession,
+stage, sex, mutant, treatment, infection). The gene reaches 27.8 TPM in the antheridium
+and stays near zero in thallus, gemma and spore, which the agent could report because the
+expression values carry condition metadata rather than bare sample identifiers.
 
-### Research Organization Registry identifiers
+![Expression of *MpBNB* across the 161 conditions in MarpolBase, retrieved through the MCP server from a single natural-language prompt. Left: top 14 conditions by mean TPM, coloured by organ type. Right: the same values grouped by tissue. \label{fig1}](./figures/fig1_expression.png)
 
-Matching the author identifier, the affiliations can be further specified with the
-[Research Organization Registry](https://ror.org/) (ROR) identifier.
-For example, this is the affiliation identifier can be added with the `ror:` field:
+In the second (Figure \ref{fig2}), we followed the bisbibenzyl biosynthesis route under
+salt stress. Expression values came from MarpolBase; the pathway context — compound
+identifiers, reactions and enzyme references — came from external resources reached
+through TogoMCP. The committing PKS/CHS step and the shared phenylpropanoid entry are
+both salt-induced, and the induction is paralog-selective within every step.
 
-```yaml
-affiliations:
-  - name: ELIXIR Europe
-    ror: 044rwnt51
-    index: 2
-```
+![The bisbibenzyl route under salt stress. (a) Pathway schematic with enzyme steps coloured by the strongest induction among the expressed paralogs of that step. (b) log2 fold change of individual genes over a 100 mM NaCl time course, grouped by step. \label{fig2}](./figures/fig2_pathway.png)
 
-### Contributor Role Taxonomy
+## What MarpolBase and TogoMCP each contribute
 
-A last feature since is minimal support for the Contributor Role Taxonomy (CRediT). You
-can specify the role of authors in writing the report with the `role:` field. However,
-the authors are responsible for selection the right terms from [CRediT](https://credit.niso.org/).
-An example looks like this:
+Working through these two analyses made the division of labour between a species-specific
+resource and a cross-database hub concrete (Table 2).
 
-```yaml
-authors:
-  - name: First Author
-    affiliation: 1
-    orcid: 0000-0000-0000-0000
-    role: Conceptualization, Writing – review & editing
-```
+Only MarpolBase can supply measured expression across its 161 conditions, the
+co-expression network (PCC / HRR / MR), DESeq2 differential expression between two
+conditions, gene–literature links curated with evidence and role, and controlled-vocabulary
+resolution with PECO and PO identifiers. It also carries its own KEGG Orthology
+assignments — `mpo:hasKEGG` for 6,563 genes. This last point mattered in practice:
+*M. polymorpha* is absent from KEGG GENES, and the enzyme nodes in Figure \ref{fig2}
+could be coloured **only** because MarpolBase assigns KO numbers itself.
 
-### A full examples
+Only TogoMCP can convert identifiers across 119 databases (TogoID) [@usesMethodIn:Ikeda2022], search the
+species-agnostic references (UniProt, PDB, Reactome, Rhea, ChEMBL, MeSH), reach the NCBI
+E-utilities for SRA, GEO and PubMed, and dispatch SPARQL to a choice of endpoints.
 
-A full example then has this structure:
+Table: Where the two resources overlap, and how the overlap differs in kind.
 
-```yaml
-authors:
-  - name: First Author
-    affiliation: 1
-    role: Writing – original draft
-  - name: Last Author
-    orcid: 0000-0000-0000-0000
-    affiliation: 2
-    role: Conceptualization, Writing – review & editing
-affiliations:
-  - name: First Affiliation
-    index: 1
-  - name: ELIXIR Europe
-    ror: 044rwnt51
-    index: 2
-```
+| Capability | MarpolBase | TogoMCP |
+| ---------- | ---------- | ------- |
+| SPARQL | One own graph (`GRAPH` must be given explicitly) | A choice of endpoints |
+| Literature | *Marchantia* papers linked to genes, with evidence and role | Generic PubMed / MeSH search |
+| Compounds | Not covered | ChEBI / Rhea / PubChem identifier conversion |
+| Gene expression | Measured values for 161 conditions | Not held |
 
-# Formatting
+## The two do not meet at the gene identifier
 
-This document use Markdown and you can look at [this tutorial](https://www.markdowntutorial.com/).
+The most useful negative result of the project: **TogoID holds no *M. polymorpha* gene
+dataset, and MarpolBase's `get_gene` does not return UniProt accessions.** There is
+therefore no identifier-conversion path that carries `Mp3g23300` directly into the TogoMCP
+side. We also confirmed that `pfam → uniprot` does not exist as a TogoID route (404),
+while `rhea`/`chebi`, `chebi`/`pubchem_compound`, `uniprot`/`rhea`, `uniprot`/`pdb` and
+`go`/`uniprot` do (in both directions).
 
-## Subsection level 2
+The two resources meet instead at the level of **shared vocabularies**:
 
-Please keep sections to a maximum of only two levels.
+1. KO numbers — the junction that made the two-layer map in Figure \ref{fig2} possible.
+2. GO and Pfam — assigned by MarpolBase, dereferenceable on the TogoMCP side.
+3. Compound identifiers (ChEBI / PubChem) — the junction for metabolome data.
 
-## Tables
+Going through UniProt instead means searching by protein name and organism, which for
+paralog families such as MpPAL1–10 is many-to-many and therefore unreliable.
 
-Tables can be added in the following way, though alternatives are possible:
+The practical rule we arrived at: use MarpolBase for measured values, conditions,
+co-expression and curated literature in *M. polymorpha*; use TogoMCP to carry those
+results outward to structures, reactions, compounds, orthologs in other species and
+sequence archives; and bridge the two with KO, GO and compound identifiers rather than
+with gene identifiers.
 
-```markdown
-Table: Note that table caption is automatically numbered and should be
-given before the table itself.
+# Side project: DFAST-Agent for DDBJ submission
 
-| Header 1 | Header 2 |
-| -------- | -------- |
-| item 1 | item 2 |
-| item 3 | item 4 |
-```
+DFAST-Agent is an AI-agent-based assistant for preparing DDBJ submission files. The
+submission procedure and the format converters are exposed to the agent as an MCP server,
+skills and tools. The agent reads and writes files on **Kura**, the authenticated object
+storage provided for DDBJ users, and collects the metadata a submission requires through
+dialogue with the user.
 
-This gives:
+**Prokaryotes.** Using the DFAST API for prokaryotic genomes [@usesMethodIn:Tanizawa2018], files held on Kura were
+converted into DDBJ submission files. Interactive preparation of a complete submission
+file from the terminal succeeded (<https://github.com/nigyta/dfast-agent-p>).
 
-Table: Note that table caption is automatically numbered and should be
-given before the table itself.
+**Eukaryotes.** A converter from GFF to DDBJ submission format was added. Terminal-based
+dialogue with the agent successfully collected the required metadata and produced the
+submission files. For users who do not work with an AI agent, we additionally built a web
+interface backed by a local LLM running on the NIG supercomputer, operating on files in
+Kura. Tuning the local-LLM agent proved difficult and the file conversion did not succeed
+in that configuration, but the work produced usable knowledge about operating against
+Kura. Development continues.
 
-| Header 1 | Header 2 |
-| -------- | -------- |
-| item 1 | item 2 |
-| item 3 | item 4 |
+# Side project: MARKit, a marker submission tool
 
-## Figures
+## Background
 
-A figure is added with:
+A submission of barcode sequences such as COI, 16S or ITS often contains hundreds to
+thousands of entries, yet the annotation is left to the submitter by hand. Coordinate
+shifts, CDS features that do not translate, and disagreement between the declared organism
+name and the sequence itself are sometimes found only after registration. **MARKit**
+(Marker Annotation and Registration Kit) builds DDBJ MSS-format submission files
+mechanically from a FASTA file plus minimal metadata, and inspects them before submission.
 
-```markdown
-![Caption for BioHackrXiv logo figure](./biohackrxiv.png)
-```
+The pipeline is: marker assignment → region determination → structural check → organism-name
+reconciliation → submission-file generation → report.
 
-This gives:
+## Features
 
-![Caption for BioHackrXiv logo figure \label{figureCode}](./biohackrxiv.png)
+- **Markers are determined, not declared.** Every model (HMM / CM) is applied and the
+  marker is decided per entry, so a submission containing mixed markers is processed
+  separately per marker and merged into a single submission file at the end. 22 markers
+  are supported.
+- **The genetic code is chosen by taxon.** Mitochondrial code tables differ between taxa,
+  so the taxon is looked up from the declared organism name before reading frames are
+  evaluated.
+- **Unregistrable shapes are avoided at generation time** — a reading frame that does not
+  translate is not emitted as a CDS, and minus-strand hits are normalised to the plus
+  strand with the coordinates moved accordingly.
+- **Organism-name reconciliation.** Sequences are compared against a reference database by
+  distance and adjudicated with per-family calibrated thresholds. Candidates are proposed
+  even when no organism name is declared, which helps to settle the species assignment.
+- **Metadata can come later.** A FASTA file alone is enough to run the analysis; the
+  submission files can be built once the metadata is available.
+- **Per-entry decisions after review.** Looking at the analysis, the submitter can withdraw
+  an entry from the submission, or register it as `misc_feature` / `misc_RNA` instead of
+  `CDS` / `rRNA`.
+- **Validated against real submissions.** Generated output is compared against the `.ann`
+  files of 91 actual submissions (about 10,000 entries), and this check is re-run whenever
+  a feature is added.
+- **Distributed as a container** carrying the runtime, the reference data and the code
+  (Apptainer 657 MB / OCI 4.7 GB, published as `nigyta/markit:latest`).
 
-Figures can be scaled by adding the width or height to the Markdown like this:
+## Web interface
 
-```markdown
-![Caption for BioHackrXiv logo figure](./biohackrxiv.png){ width=50px }
-```
+To widen the user base, MARKit was embedded in the existing DDBJ Gene/Genome Submission
+(GGS) tool as a web interface (Figures \ref{fig3} and \ref{fig4}). MARKit itself is invoked as a
+container, so the analysis logic is identical to the command-line version. The interface
+has five screens — INPUT, ANALYSIS, BIOLOGICAL SOURCE, COMMON, BUILD & VALIDATE — and
+several FASTA files can be analysed with different marker settings in one job. Screens are
+bilingual (Japanese and English), and all uploads are validated server-side.
 
-You can add cross references to figures by adding a LaTeX `\label{figureCode}` to
-the label of the Markdown figure and then use `\ref{figureCode}` to cite it:
+![The MARKit web interface, INPUT screen. Each FASTA file is paired with a marker setting (`auto` lets MARKit decide), and `common.json` and the sample metadata TSV can be supplied here or later. \label{fig3}](./figures/fig3a_markit.png)
 
-```markdown
-![Caption for BioHackrXiv logo figure \label{figureCode}](./biohackrxiv.png){ width=50px }
-```
+![The MARKit web interface, per-entry analysis table. Each entry carries its assigned marker, status, feature location, codon start, query coverage and alerts; from here an entry can be withdrawn from the submission or demoted to `misc_feature` / `misc_RNA`. \label{fig4}](./figures/fig3b_markit.png)
 
-This way, we can cite Figure \ref{figureCode}.
+## Status
 
-# Other main section on your manuscript level 1
-
-Lists can be added with:
-
-1. Item 1
-2. Item 2
-
-# Citation Typing Ontology annotation
-
-You can use [CiTO](http://purl.org/spar/cito/2018-02-12) annotations, as explained in [this BioHackathon Europe 2021 write up](https://raw.githubusercontent.com/biohackrxiv/bhxiv-metadata/main/doc/elixir_biohackathon2021/paper.md) and [this CiTO Pilot](https://www.biomedcentral.com/collections/cito).
-Using this template, you can cite an article and indicate _why_ you cite that article, for instance DisGeNET-RDF [@citesAsAuthority:Queralt2016].
-
-The syntax in Markdown is as follows: a single intention annotation looks like
-`[@usesMethodIn:Krewinkel2017]`; two or more intentions are separated
-with colons, like `[@extends:discusses:Nielsen2017Scholia]`. When you cite two
-different articles, you use this syntax: `[@citesAsDataSource:Ammar2022ETL; @citesAsDataSource:Arend2022BioHackEU22]`.
-
-Possible CiTO typing annotation include:
-
-* citesAsDataSource: when you point the reader to a source of data which may explain a claim
-* usesDataFrom: when you reuse somehow (and elaborate on) the data in the cited entity
-* usesMethodIn
-* citesAsAuthority
-* citesAsEvidence
-* citesAsPotentialSolution
-* citesAsRecommendedReading
-* citesAsRelated
-* citesAsSourceDocument
-* citesForInformation
-* confirms
-* documents
-* providesDataFor
-* obtainsSupportFrom
-* discusses
-* extends
-* agreesWith
-* disagreesWith
-* updates
-
-There is a general `cites` intention, but this is already implied and should be left out.
-
-# Results
-
+The command-line version is usable in production, and all five screens of the web version
+work end to end.
 
 # Discussion
 
-...
+Publishing MarpolBase as RDF made it possible to link a species-specific plant genome
+resource to external resources, and registering the endpoint with TogoMCP and RDF Portal
+contributed a plant genome resource to the shared Japanese infrastructure. The most
+transferable lesson is the one in Table 2 and the section that follows it: for a resource
+covering a species that the major cross-reference hubs do not index, the integration point
+is not the gene identifier but the shared vocabularies the resource chooses to assign —
+in our case, above all, its own KO assignments.
+
+On the DDBJ side, both DFAST-Agent and MARKit reduce manual work in submission
+preparation, but they do so under different assumptions: DFAST-Agent collects what it
+needs through dialogue and therefore depends on a capable agent, while MARKit derives what
+it can from the sequence itself and asks the submitter only where a decision is genuinely
+required. The local-LLM experiment showed that the dialogue-based approach is currently
+hard to reproduce without a frontier model, which is an argument for keeping the
+deterministic path available alongside it.
 
 ## Acknowledgements
 
-...
+We thank the organizers of the DBCLS BioHackathon 2026 and the other participants for
+discussion. This work used TogoMCP and RDF Portal maintained by DBCLS.
 
 # References
-
-```{=latex}
-\AtEndDocument{%
-```
-
-# Appendices
-
-If you want the Appendix (-ces) to show up after the references, wrap them in 
-after the header, like done in this Markdown file. Look at the [source](paper.md)
-to see the exact structure.
-
-```{=latex}
-}
-```

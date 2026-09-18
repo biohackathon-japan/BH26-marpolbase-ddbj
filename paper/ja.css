@@ -1,0 +1,37 @@
+@page { size: A4; margin: 20mm 18mm; }
+html { font-size: 10.5pt; }
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP",
+               "Yu Gothic", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.75;
+  color: #111;
+  margin: 0;
+  text-align: justify;
+  word-break: normal;
+  line-break: strict;
+}
+h1, h2, h3 { font-weight: 600; line-height: 1.4; break-after: avoid; }
+h1 { font-size: 1.45rem; margin: 1.8em 0 .6em; padding-bottom: .25em; border-bottom: 1px solid #ccc; }
+h2 { font-size: 1.15rem; margin: 1.4em 0 .5em; }
+h3 { font-size: 1.02rem; margin: 1.2em 0 .4em; }
+p { margin: .6em 0; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .9em;
+       background: #f2f2f2; padding: .1em .3em; border-radius: 3px; }
+a { color: #1a4f8a; text-decoration: none; word-break: break-all; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: .88rem;
+        break-inside: avoid; }
+th, td { border-bottom: 1px solid #ddd; padding: .45em .6em; text-align: left;
+         vertical-align: top; }
+thead th { border-top: 1.2px solid #444; border-bottom: 1.2px solid #444;
+           background: #fafafa; font-weight: 600; }
+tbody tr:last-child td { border-bottom: 1.2px solid #444; }
+figure { margin: 1.4em 0; break-inside: avoid; text-align: center; }
+figure img { max-width: 100%; height: auto; border: 1px solid #e3e3e3; }
+figcaption { font-size: .85rem; color: #333; margin-top: .5em; text-align: left; }
+ul, ol { padding-left: 1.4em; }
+li { margin: .3em 0; }
+blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1em; color: #555; }
+.titleblock { border-bottom: 2px solid #333; padding-bottom: 1em; margin-bottom: 1.5em; }
+.titleblock .ttl { font-size: 1.55rem; font-weight: 600; line-height: 1.45; }
+.titleblock .auth { margin-top: .9em; font-size: 1rem; }
+.titleblock .affil, .titleblock .meta { margin-top: .4em; font-size: .85rem; color: #444; }
