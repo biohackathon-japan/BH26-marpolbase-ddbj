@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MarpolBase as a Knowledge Base — BH26 wrap-up</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap">
+<style>
+  /* One 16:9 slide, authored at 1920x1080 CSS px (= 20in x 11.25in at 96dpi). */
+  @page { size: 20in 11.25in; margin: 0 }
+  * { margin: 0; padding: 0; box-sizing: border-box }
+  html, body { width: 1920px; height: 1080px; overflow: hidden }
+  body {
+    background: #F7F8F4;
+    color: #13251E;
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    padding: 88px 128px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .head { display: flex; align-items: flex-end; gap: 40px }
+  .head-l { flex: 1; display: flex; flex-direction: column; gap: 10px }
+  .head-r { width: 560px; display: flex; flex-direction: column; gap: 4px; text-align: right }
+  .eyebrow {
+    font-size: 24px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: #2F7A5A;
+  }
+  h1 { font-family: 'Source Serif 4', Georgia, serif; font-size: 60px; font-weight: 600; line-height: 1.1 }
+  .who { font-size: 28px; font-weight: 600 }
+  .who-sub { font-size: 24px; color: #6B776F }
+  hr { border: none; border-top: 1px solid #DDE3DC }
+  .body { display: flex; gap: 48px; flex: 1; min-height: 0 }
+  .col-l { flex: 1; display: flex; flex-direction: column; gap: 26px }
+  .banner {
+    font-size: 30px; font-weight: 600; line-height: 1.3; color: #13342A;
+    background: #D8EADF; border-radius: 14px; padding: 22px 30px;
+  }
+  ul { font-size: 28px; line-height: 1.5; padding-left: 34px }
+  li { margin: 0 0 14px }
+  .spacer { flex: 1 }
+  .links { font-size: 24px; line-height: 1.4; color: #6B776F }
+  .col-r { width: 620px; display: flex; flex-direction: column; gap: 12px }
+  .col-r img {
+    width: 620px; object-fit: contain;
+    background: #FFFFFF; border: 1px solid #DDE3DC; border-radius: 10px;
+  }
+  .fig1 { height: 230px }
+  .fig2 { height: 362px }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="head-l">
+      <p class="eyebrow">DBCLS BioHackathon 2026 &middot; Wrap-up &middot; marpolbase-ddbj</p>
+      <h1>MarpolBase as a Knowledge Base</h1>
+    </div>
+    <div class="head-r">
+      <p class="who">Yasuhiro Tanizawa</p>
+      <p class="who">Takatomo Fujisawa</p>
+      <p class="who-sub">with Y. Yamamoto, T. Ohta, E. Bolton</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="body">
+    <div class="col-l">
+      <p class="banner">Everything in our day-one plan &mdash; delivered.</p>
+      <ul>
+        <li>Published gene, expression and literature data as <b>RDF</b></li>
+        <li>Opened a public <b>SPARQL endpoint</b>, registered with RDF Portal and TogoMCP</li>
+        <li>Built an <b>MCP server</b> with 14 typed tools over the endpoint</li>
+        <li>Reached out to reactions, pathways and compounds through TogoMCP</li>
+        <li>Drove analyses end to end from <b>natural-language prompts</b>, no hand-written SPARQL</li>
+        <li>Found where the join happens: <b>KO / GO / compound IDs</b>, not gene IDs</li>
+      </ul>
+      <div class="spacer"></div>
+      <p class="links">marchantia.info &mdash; /rdf/ &nbsp;&middot;&nbsp; /sparql &nbsp;&middot;&nbsp; /mcp<br>Report: github.com/biohackathon-japan/BH26-marpolbase-ddbj</p>
+    </div>
+
+    <div class="col-r">
+      <p class="eyebrow">Figures an agent can now produce</p>
+      <img class="fig1" src="../paper/figures/fig1_expression.png"
+           alt="Example figure: a gene's expression across all 161 conditions, as a bar chart and grouped by tissue">
+      <img class="fig2" src="../paper/figures/fig2_pathway.png"
+           alt="Example figure: a pathway schematic beside a heatmap of per-gene induction over a time course">
+    </div>
+  </div>
+</body>
+</html>
