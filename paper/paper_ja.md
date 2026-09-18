@@ -49,8 +49,7 @@ AI エージェントから利用できるようにした。
 | MarpolBase RDF | <https://marchantia.info/rdf/> | MarpolBase の遺伝子・発現・文献データの RDF 配布 |
 | MarpolBase SPARQL エンドポイント | <https://marchantia.info/sparql> | 公開エンドポイント。TogoMCP と RDF Portal に登録済み |
 | MarpolBase MCP サーバ | <https://marchantia.info/mcp> | 遺伝子・発現・共発現・文献への型付きアクセスを提供する 14 ツール |
-| dfast-agent-p | <https://github.com/nigyta/dfast-agent-p> | DFAST API を用いて原核生物ゲノムの DDBJ 登録ファイルを作成するエージェント |
-| DFAST-Agent (真核生物用) | 開発中 | GFF から DDBJ 登録ファイルへの変換エージェント。local LLM を用いた Web インターフェースも開発中 |
+| DFAST-Agent | 未公開 | DDBJ 登録ファイルを組み立てるエージェントの試験的なプロトタイプ実装。原核生物ゲノム (DFAST API 経由) と真核生物ゲノム (GFF から) に対応。local LLM を用いた Web インターフェースも試作した |
 | MARKit | <https://ggs-staging.ddbj.nig.ac.jp/tools/markit> | 系統マーカー配列の登録支援ツール。コンテナ `nigyta/markit:latest` |
 
 # MarpolBase の RDF 化と MCP サーバ
@@ -137,14 +136,16 @@ KO・GO・化合物 ID で行う。
 
 # サイドプロジェクト: DDBJ 登録支援ツール DFAST-Agent
 
-DFAST-Agent は、AI エージェントによる DDBJ 登録ファイル作成支援ツールである。登録のための
-手順や converter を MCP サーバ・スキル・ツールとしてエージェントに提供する。エージェントは
+DFAST-Agent は、AI エージェントによる DDBJ 登録ファイル作成支援ツールの試験的なプロトタイプ
+実装である。このアプローチが成立するかを確かめるためにハッカソン中に構築したものであり、
+公開されたツールではない。登録のための手順や converter を MCP サーバ・スキル・ツールとして
+エージェントに提供する。エージェントは
 DDBJ ユーザー向けの認証付きオブジェクトストレージ **Kura** 上のファイルを参照・操作し、
 登録に必要なメタデータはユーザーとの対話を通じて収集する。
 
 **原核生物用ツール。** 原核生物ゲノム用の DFAST API (Tanizawa et al., 2018) を用いて、Kura 上のファイルを DDBJ 登録
-ファイルに変換した。ターミナル上での対話的な操作により、登録ファイルの作成に成功している
-(<https://github.com/nigyta/dfast-agent-p>)。
+ファイルに変換した。ターミナル上での対話的な操作により、プロトタイプ上で登録ファイルの作成に
+成功している。
 
 **真核生物用ツール。** GFF ファイルから DDBJ 登録ファイルへの変換を実装した。ターミナル上での
 エージェントとの対話により、必要なメタデータ情報の収集と登録用ファイルへの変換に成功した。
@@ -210,8 +211,9 @@ MarpolBase を RDF 化することで、種特異的な植物ゲノムリソー�
 の接点は遺伝子 ID ではなく、そのリソースが自ら付与することを選んだ共通語彙 — 本件では何より
 独自の KO 付与 — である。
 
-DDBJ 側については、DFAST-Agent と MARKit はいずれも登録作業の手作業を減らすものだが、前提と
-する条件が異なる。DFAST-Agent は必要な情報を対話で集めるため能力の高いエージェントに依存する
+DDBJ 側については、DFAST-Agent と MARKit はいずれも登録作業の手作業を減らすものだが、開発段階
+も前提とする条件も異なる。DFAST-Agent はまだプロトタイプであり、必要な情報を対話で集めるため
+能力の高いエージェントに依存する
 のに対し、MARKit は配列から導ける部分は自動で決め、本当に判断が必要な箇所だけを提出者に尋ねる。
 local LLM での試みは、対話型のアプローチが現時点ではフロンティアモデル無しには再現しにくい
 ことを示しており、決定的な経路を並行して保つことの根拠になっている。

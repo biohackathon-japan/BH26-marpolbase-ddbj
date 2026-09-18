@@ -56,8 +56,7 @@ Table: Resources and tools developed or extended during BioHackathon 2026.
 | MarpolBase RDF | RDF distribution of the MarpolBase gene, expression and literature data. <https://marchantia.info/rdf/> |
 | MarpolBase SPARQL endpoint | Public endpoint, registered with TogoMCP and RDF Portal. <https://marchantia.info/sparql> |
 | MarpolBase MCP server | 14 tools giving agents typed access to genes, expression, co-expression and literature. <https://marchantia.info/mcp> |
-| dfast-agent-p | Agent that builds DDBJ submission files for prokaryotic genomes via the DFAST API. <https://github.com/nigyta/dfast-agent-p> |
-| DFAST-Agent (eukaryote) | GFF-to-DDBJ conversion agent; a web interface backed by a local LLM is also being developed. In development. |
+| DFAST-Agent | Experimental prototype of an agent that assembles DDBJ submission files, covering prokaryotic genomes (via the DFAST API) and eukaryotic genomes (from GFF). A web interface backed by a local LLM was also prototyped. Not released. |
 | MARKit | Marker Annotation and Registration Kit, distributed as the container `nigyta/markit:latest`. <https://ggs-staging.ddbj.nig.ac.jp/tools/markit> |
 
 # MarpolBase RDF and MCP server
@@ -149,15 +148,16 @@ with gene identifiers.
 
 # Side project: DFAST-Agent for DDBJ submission
 
-DFAST-Agent is an AI-agent-based assistant for preparing DDBJ submission files. The
-submission procedure and the format converters are exposed to the agent as an MCP server,
-skills and tools. The agent reads and writes files on **Kura**, the authenticated object
+DFAST-Agent is an experimental prototype implementation of an AI-agent-based assistant for
+preparing DDBJ submission files. It was built during the hackathon to test whether the
+approach works at all; it is not a released tool. The submission procedure and the format
+converters are exposed to the agent as an MCP server, skills and tools. The agent reads and writes files on **Kura**, the authenticated object
 storage provided for DDBJ users, and collects the metadata a submission requires through
 dialogue with the user.
 
-**Prokaryotes.** Using the DFAST API for prokaryotic genomes [@usesMethodIn:Tanizawa2018], files held on Kura were
-converted into DDBJ submission files. Interactive preparation of a complete submission
-file from the terminal succeeded (<https://github.com/nigyta/dfast-agent-p>).
+**Prokaryotes.** Using the DFAST API for prokaryotic genomes [@usesMethodIn:Tanizawa2018],
+files held on Kura were converted into DDBJ submission files. Interactive preparation of a
+complete submission file from the terminal succeeded in the prototype.
 
 **Eukaryotes.** A converter from GFF to DDBJ submission format was added. Terminal-based
 dialogue with the agent successfully collected the required metadata and produced the
@@ -236,8 +236,9 @@ is not the gene identifier but the shared vocabularies the resource chooses to a
 in our case, above all, its own KO assignments.
 
 On the DDBJ side, both DFAST-Agent and MARKit reduce manual work in submission
-preparation, but they do so under different assumptions: DFAST-Agent collects what it
-needs through dialogue and therefore depends on a capable agent, while MARKit derives what
+preparation, but they are at different stages and rest on different assumptions:
+DFAST-Agent is still a prototype and collects what it needs through dialogue, which makes
+it dependent on a capable agent, while MARKit derives what
 it can from the sequence itself and asks the submitter only where a decision is genuinely
 required. The local-LLM experiment showed that the dialogue-based approach is currently
 hard to reproduce without a frontier model, which is an argument for keeping the
