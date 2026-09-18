@@ -1,12 +1,12 @@
 ---
-title: 'DBCLS BioHackathon 2026 report: A knowledge base for the Marchantia genome database MarpolBase, and AI-assisted tools for DDBJ submission'
-title_short: 'BioHackJP26: MarpolBase RDF/MCP and DDBJ submission agents'
+title: 'DBCLS BioHackathon 2026 report: A knowledge base for the Marchantia genome database MarpolBase'
+title_short: 'BioHackJP26: MarpolBase RDF and MCP server'
 tags:
   - Semantic web
   - RDF
   - Model Context Protocol
   - Marchantia polymorpha
-  - DDBJ
+  - Gene expression
 authors:
   - name: Yasuhiro Tanizawa
     affiliation: 1
@@ -34,18 +34,16 @@ authors_short: Tanizawa \& Fujisawa
 
 # Introduction
 
-Our group worked on two loosely coupled goals during the DBCLS BioHackathon 2026.
+Our goal at the DBCLS BioHackathon 2026 was to turn **MarpolBase**
+[@citesAsDataSource:Tanizawa2025], the genome database of the liverwort
+*Marchantia polymorpha* [@citesAsDataSource:Bowman2017], into a knowledge base: to publish
+its gene, expression and literature data as RDF, to expose them through a SPARQL endpoint,
+and to make them reachable from AI agents through a Model Context Protocol (MCP) server.
 
-The first was to turn **MarpolBase** [@citesAsDataSource:Tanizawa2025], the genome database of
-the liverwort *Marchantia polymorpha* [@citesAsDataSource:Bowman2017], into a knowledge base: to publish its gene, expression and
-literature data as RDF, to expose them through a SPARQL endpoint, and to make them
-reachable from AI agents through a Model Context Protocol (MCP) server.
-
-The second was to lower the cost of **depositing data in DDBJ**. Preparing a DDBJ
-submission file is still largely manual work, and the two side projects reported here —
-DFAST-Agent and MARKit — attack that problem from two directions: an agent that
-assembles submission files through dialogue with the user, and a tool that builds and
-checks marker-sequence submissions mechanically.
+The question behind this was practical. *M. polymorpha* is not indexed by the major
+cross-reference hubs, so it is not obvious that a species-specific resource can be linked
+to the wider set of life-science databases at all. Much of what follows is therefore about
+*where* the join actually happens.
 
 Table 1 lists what was produced.
 
@@ -56,8 +54,6 @@ Table: Resources and tools developed or extended during BioHackathon 2026.
 | MarpolBase RDF | RDF distribution of the MarpolBase gene, expression and literature data. <https://marchantia.info/rdf/> |
 | MarpolBase SPARQL endpoint | Public endpoint, registered with TogoMCP and RDF Portal. <https://marchantia.info/sparql> |
 | MarpolBase MCP server | 14 tools giving agents typed access to genes, expression, co-expression and literature. <https://marchantia.info/mcp> |
-| DFAST-Agent | Experimental prototype of an agent that assembles DDBJ submission files, covering prokaryotic genomes (via the DFAST API) and eukaryotic genomes (from GFF). A web interface backed by a local LLM was also prototyped. Not released. |
-| MARKit | Marker Annotation and Registration Kit, distributed as the container `nigyta/markit:latest`. <https://ggs-staging.ddbj.nig.ac.jp/tools/markit> |
 
 # MarpolBase RDF and MCP server
 
@@ -146,85 +142,6 @@ results outward to structures, reactions, compounds, orthologs in other species 
 sequence archives; and bridge the two with KO, GO and compound identifiers rather than
 with gene identifiers.
 
-# Side project: DFAST-Agent for DDBJ submission
-
-DFAST-Agent is an experimental prototype implementation of an AI-agent-based assistant for
-preparing DDBJ submission files. It was built during the hackathon to test whether the
-approach works at all; it is not a released tool. The submission procedure and the format
-converters are exposed to the agent as an MCP server, skills and tools. The agent reads and writes files on **Kura**, the authenticated object
-storage provided for DDBJ users, and collects the metadata a submission requires through
-dialogue with the user.
-
-**Prokaryotes.** Using the DFAST API for prokaryotic genomes [@usesMethodIn:Tanizawa2018],
-files held on Kura were converted into DDBJ submission files. Interactive preparation of a
-complete submission file from the terminal succeeded in the prototype.
-
-**Eukaryotes.** A converter from GFF to DDBJ submission format was added. Terminal-based
-dialogue with the agent successfully collected the required metadata and produced the
-submission files. For users who do not work with an AI agent, we additionally built a web
-interface backed by a local LLM running on the NIG supercomputer, operating on files in
-Kura. Tuning the local-LLM agent proved difficult and the file conversion did not succeed
-in that configuration, but the work produced usable knowledge about operating against
-Kura. Development continues.
-
-# Side project: MARKit, a marker submission tool
-
-## Background
-
-A submission of barcode sequences such as COI, 16S or ITS often contains hundreds to
-thousands of entries, yet the annotation is left to the submitter by hand. Coordinate
-shifts, CDS features that do not translate, and disagreement between the declared organism
-name and the sequence itself are sometimes found only after registration. **MARKit**
-(Marker Annotation and Registration Kit) builds DDBJ MSS-format submission files
-mechanically from a FASTA file plus minimal metadata, and inspects them before submission.
-
-The pipeline is: marker assignment → region determination → structural check → organism-name
-reconciliation → submission-file generation → report.
-
-## Features
-
-- **Markers are determined, not declared.** Every model (HMM / CM) is applied and the
-  marker is decided per entry, so a submission containing mixed markers is processed
-  separately per marker and merged into a single submission file at the end. 22 markers
-  are supported.
-- **The genetic code is chosen by taxon.** Mitochondrial code tables differ between taxa,
-  so the taxon is looked up from the declared organism name before reading frames are
-  evaluated.
-- **Unregistrable shapes are avoided at generation time** — a reading frame that does not
-  translate is not emitted as a CDS, and minus-strand hits are normalised to the plus
-  strand with the coordinates moved accordingly.
-- **Organism-name reconciliation.** Sequences are compared against a reference database by
-  distance and adjudicated with per-family calibrated thresholds. Candidates are proposed
-  even when no organism name is declared, which helps to settle the species assignment.
-- **Metadata can come later.** A FASTA file alone is enough to run the analysis; the
-  submission files can be built once the metadata is available.
-- **Per-entry decisions after review.** Looking at the analysis, the submitter can withdraw
-  an entry from the submission, or register it as `misc_feature` / `misc_RNA` instead of
-  `CDS` / `rRNA`.
-- **Validated against real submissions.** Generated output is compared against the `.ann`
-  files of 91 actual submissions (about 10,000 entries), and this check is re-run whenever
-  a feature is added.
-- **Distributed as a container** carrying the runtime, the reference data and the code
-  (Apptainer 657 MB / OCI 4.7 GB, published as `nigyta/markit:latest`).
-
-## Web interface
-
-To widen the user base, MARKit was embedded in the existing DDBJ Gene/Genome Submission
-(GGS) tool as a web interface (Figures \ref{fig3} and \ref{fig4}). MARKit itself is invoked as a
-container, so the analysis logic is identical to the command-line version. The interface
-has five screens — INPUT, ANALYSIS, BIOLOGICAL SOURCE, COMMON, BUILD & VALIDATE — and
-several FASTA files can be analysed with different marker settings in one job. Screens are
-bilingual (Japanese and English), and all uploads are validated server-side.
-
-![The MARKit web interface, INPUT screen. Each FASTA file is paired with a marker setting (`auto` lets MARKit decide), and `common.json` and the sample metadata TSV can be supplied here or later. \label{fig3}](./figures/fig3a_markit.png)
-
-![The MARKit web interface, per-entry analysis table. Each entry carries its assigned marker, status, feature location, codon start, query coverage and alerts; from here an entry can be withdrawn from the submission or demoted to `misc_feature` / `misc_RNA`. \label{fig4}](./figures/fig3b_markit.png)
-
-## Status
-
-The command-line version is usable in production, and all five screens of the web version
-work end to end.
-
 # Discussion
 
 Publishing MarpolBase as RDF made it possible to link a species-specific plant genome
@@ -235,14 +152,11 @@ covering a species that the major cross-reference hubs do not index, the integra
 is not the gene identifier but the shared vocabularies the resource chooses to assign —
 in our case, above all, its own KO assignments.
 
-On the DDBJ side, both DFAST-Agent and MARKit reduce manual work in submission
-preparation, but they are at different stages and rest on different assumptions:
-DFAST-Agent is still a prototype and collects what it needs through dialogue, which makes
-it dependent on a capable agent, while MARKit derives what
-it can from the sequence itself and asks the submitter only where a decision is genuinely
-required. The local-LLM experiment showed that the dialogue-based approach is currently
-hard to reproduce without a frontier model, which is an argument for keeping the
-deterministic path available alongside it.
+The MCP server also changed how the resource is used in practice. Both analyses in this
+report were driven from a natural-language prompt rather than from hand-written SPARQL,
+and the value of the typed tools was less in saving keystrokes than in carrying the
+condition metadata along with the numbers, so that the agent could report *where* a gene
+is expressed and not only *how much*.
 
 ## Acknowledgements
 

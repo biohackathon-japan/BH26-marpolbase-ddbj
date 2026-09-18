@@ -1,12 +1,12 @@
 ---
-title: 'DBCLS BioHackathon 2026 レポート: ゼニゴケゲノムデータベース MarpolBase の知識ベース化と、AI を用いた DDBJ 登録支援ツール'
-title_short: 'BioHackJP26: MarpolBase の RDF/MCP 化と DDBJ 登録支援エージェント'
+title: 'DBCLS BioHackathon 2026 レポート: ゼニゴケゲノムデータベース MarpolBase の知識ベース化'
+title_short: 'BioHackJP26: MarpolBase の RDF 化と MCP サーバ'
 tags:
   - セマンティックウェブ
   - RDF
   - Model Context Protocol
   - ゼニゴケ (Marchantia polymorpha)
-  - DDBJ
+  - 遺伝子発現
 authors:
   - name: 谷澤 靖洋 (Yasuhiro Tanizawa)
     affiliation: 1
@@ -28,17 +28,14 @@ git_url: https://github.com/biohackathon-japan/BH26-marpolbase-ddbj
 
 # はじめに
 
-本プロジェクトでは、ゆるやかに関連する二つの目標に取り組んだ。
+本プロジェクトの目標は、ゼニゴケ (*Marchantia polymorpha*; Bowman et al., 2017) のゲノム
+データベース **MarpolBase** (Tanizawa et al., 2025) を知識ベース化することである。具体的には、
+遺伝子・発現・文献のデータを RDF として公開し、SPARQL エンドポイントを通じて提供し、さらに
+Model Context Protocol (MCP) サーバを介して AI エージェントから利用できるようにした。
 
-一つめは、ゼニゴケ (*Marchantia polymorpha*; Bowman et al., 2017) のゲノムデータベース
-**MarpolBase** (Tanizawa et al., 2025) を知識ベース化することである。具体的には、遺伝子・発現・文献のデータを RDF として公開し、
-SPARQL エンドポイントを通じて提供し、さらに Model Context Protocol (MCP) サーバを介して
-AI エージェントから利用できるようにした。
-
-二つめは、**DDBJ への登録コスト**を下げることである。DDBJ 登録ファイルの作成は依然として
-手作業に頼る部分が大きい。ここで報告する二つのサイドプロジェクト — DFAST-Agent と MARKit —
-は、この問題に二つの方向から取り組むものである。前者は対話を通じて登録ファイルを組み立てる
-エージェントであり、後者は登録ファイルを機械的に生成・点検するツールである。
+その背後にある問いは実務的なものである。ゼニゴケは主要な横断参照ハブに索引されていないため、
+種特異的なリソースをライフサイエンスの広いデータベース群と連結できるかどうか自体が自明では
+ない。以下の多くは、その接合点が**どこで**成立するのかについての報告である。
 
 本ハッカソンで作成したリソースとツールを表 1 に示す。
 
@@ -49,8 +46,6 @@ AI エージェントから利用できるようにした。
 | MarpolBase RDF | <https://marchantia.info/rdf/> | MarpolBase の遺伝子・発現・文献データの RDF 配布 |
 | MarpolBase SPARQL エンドポイント | <https://marchantia.info/sparql> | 公開エンドポイント。TogoMCP と RDF Portal に登録済み |
 | MarpolBase MCP サーバ | <https://marchantia.info/mcp> | 遺伝子・発現・共発現・文献への型付きアクセスを提供する 14 ツール |
-| DFAST-Agent | 未公開 | DDBJ 登録ファイルを組み立てるエージェントの試験的なプロトタイプ実装。原核生物ゲノム (DFAST API 経由) と真核生物ゲノム (GFF から) に対応。local LLM を用いた Web インターフェースも試作した |
-| MARKit | <https://ggs-staging.ddbj.nig.ac.jp/tools/markit> | 系統マーカー配列の登録支援ツール。コンテナ `nigyta/markit:latest` |
 
 # MarpolBase の RDF 化と MCP サーバ
 
@@ -134,74 +129,6 @@ PubMed へのアクセス、そして複数エンドポイントを選択して�
 アーカイブへ広げたいときは TogoMCP を使う。そして両者の橋渡しは、遺伝子 ID ではなく
 KO・GO・化合物 ID で行う。
 
-# サイドプロジェクト: DDBJ 登録支援ツール DFAST-Agent
-
-DFAST-Agent は、AI エージェントによる DDBJ 登録ファイル作成支援ツールの試験的なプロトタイプ
-実装である。このアプローチが成立するかを確かめるためにハッカソン中に構築したものであり、
-公開されたツールではない。登録のための手順や converter を MCP サーバ・スキル・ツールとして
-エージェントに提供する。エージェントは
-DDBJ ユーザー向けの認証付きオブジェクトストレージ **Kura** 上のファイルを参照・操作し、
-登録に必要なメタデータはユーザーとの対話を通じて収集する。
-
-**原核生物用ツール。** 原核生物ゲノム用の DFAST API (Tanizawa et al., 2018) を用いて、Kura 上のファイルを DDBJ 登録
-ファイルに変換した。ターミナル上での対話的な操作により、プロトタイプ上で登録ファイルの作成に
-成功している。
-
-**真核生物用ツール。** GFF ファイルから DDBJ 登録ファイルへの変換を実装した。ターミナル上での
-エージェントとの対話により、必要なメタデータ情報の収集と登録用ファイルへの変換に成功した。
-また AI エージェントを利用しないユーザーのために、遺伝研スパコン上で動く local LLM を
-バックエンドとする Web インターフェースを開発し、Kura 上でのファイル操作による登録ファイル
-作成を目指した。local LLM を使ったエージェントのチューニングが難しく、この構成でのファイル
-変換は成功しなかったが、Kura の利用ノウハウを得ることができた。開発は継続中である。
-
-# サイドプロジェクト: 系統マーカー登録用ツール MARKit
-
-## 背景
-
-COI、16S、ITS などのバーコード配列の登録は、1 提出に数百〜数千エントリが含まれる一方、
-アノテーションは提出者の手作業に頼っている。そのため、座標のずれ、翻訳できない CDS、申告
-学名と配列の不一致が登録後に見つかることがある。**MARKit** (Marker Annotation and
-Registration Kit) は、FASTA と最小限のメタデータから DDBJ MSS 形式の登録ファイルを機械的に
-組み立て、提出前に点検するツールである。
-
-処理の流れは、マーカー判定 → 領域決定 → 構造検査 → 学名整合 → 登録ファイル生成 → レポート
-である。
-
-## 特徴
-
-- **マーカーを申告に頼らず判定する。** 全モデル (HMM / CM) を当ててエントリごとに決めるため、
-  1 提出にマーカーが混在していても分けて処理し、最後に 1 つの登録ファイルへ合流させる。
-  対応マーカーは 22 種。
-- **分類群に応じて遺伝暗号表を選ぶ。** ミトコンドリアの暗号表は分類群ごとに異なるため、申告
-  学名から分類群を引いたうえで読み枠を評価する。
-- **登録できない形を生成の段階で回避する。** 翻訳できない読み枠を CDS にしない、逆鎖は
-  plus 鎖に揃えて座標を移す、など。
-- **学名整合。** 参照 DB と配列を距離ベースで照合し、科ごとに較正した閾値で裁定する。申告
-  学名が無い場合も候補を出すので、種名確定の材料になる。
-- **メタデータが揃う前に解析できる。** FASTA だけで解析を実行し、後から登録ファイルを作れる。
-- **解析結果を見てエントリ単位に指示できる。** 「登録から外す」「CDS / rRNA ではなく
-  `misc_feature` / `misc_RNA` として登録する」を選択できる。
-- **実登録データで検証している。** 実際に登録された提出 91 件・約 1 万エントリについて、生成
-  結果を実登録の `.ann` と突き合わせ、機能追加のたびに検証している。
-- **コンテナで配布。** 実行環境・参照データ・コードを同梱 (Apptainer 657 MB / OCI 4.7 GB、
-  `nigyta/markit:latest` として公開)。
-
-## Web インターフェースの開発
-
-利用者を広げるため、既存の DDBJ Gene/Genome Submission (GGS) ツールに Web インターフェース
-として組み込んだ (図 3、図 4)。MARKit 本体をコンテナとして呼び出す構成で、解析ロジックは
-コマンドライン版と同一である。画面は INPUT / ANALYSIS / BIOLOGICAL SOURCE / COMMON /
-BUILD & VALIDATE の 5 つからなり、複数の FASTA をそれぞれ異なるマーカー設定で解析できる。
-画面は日英併記で、アップロードはすべてサーバ側で検証している。
-
-![MARKit Web インターフェースの INPUT 画面。FASTA ファイルごとにマーカー設定を指定する (`auto` にすると MARKit が判定する)。`common.json` とサンプルメタデータ TSV はここでも後の画面でも渡せる。](./figures/fig3a_markit.png)
-
-![MARKit Web インターフェースのエントリ単位の解析表。各エントリについて判定されたマーカー、ステータス、フィーチャー座標、codon start、query coverage、アラートが表示され、ここから登録の取り下げや `misc_feature` / `misc_RNA` への変更を指示できる。](./figures/fig3b_markit.png)
-
-## 現状
-
-コマンドライン版は実運用で使える状態にあり、Web 版も 5 画面が通しで動作している。
-
 # まとめ
 
 MarpolBase を RDF 化することで、種特異的な植物ゲノムリソースを外部リソースと連動させることが
@@ -211,12 +138,10 @@ MarpolBase を RDF 化することで、種特異的な植物ゲノムリソー�
 の接点は遺伝子 ID ではなく、そのリソースが自ら付与することを選んだ共通語彙 — 本件では何より
 独自の KO 付与 — である。
 
-DDBJ 側については、DFAST-Agent と MARKit はいずれも登録作業の手作業を減らすものだが、開発段階
-も前提とする条件も異なる。DFAST-Agent はまだプロトタイプであり、必要な情報を対話で集めるため
-能力の高いエージェントに依存する
-のに対し、MARKit は配列から導ける部分は自動で決め、本当に判断が必要な箇所だけを提出者に尋ねる。
-local LLM での試みは、対話型のアプローチが現時点ではフロンティアモデル無しには再現しにくい
-ことを示しており、決定的な経路を並行して保つことの根拠になっている。
+MCP サーバの構築は、このリソースの使われ方も変えた。本稿の二つの解析はいずれも手書きの
+SPARQL ではなく自然言語のプロンプトから駆動している。型付きツールの価値は入力の手間を省く
+ことよりも、数値に条件メタデータを伴わせる点にあった。そのおかげでエージェントは、ある遺伝子が
+**どれだけ**発現しているかだけでなく**どこで**発現しているかを報告できる。
 
 ## 参考文献
 
@@ -228,9 +153,6 @@ local LLM での試みは、対話型のアプローチが現時点ではフロ�
 - Bowman JL, Kohchi T, Yamato KT, et al. Insights into Land Plant Evolution Garnered
   from the *Marchantia polymorpha* Genome. *Cell* 2017;171(2):287-304.e15.
   <https://doi.org/10.1016/j.cell.2017.09.030>
-- Tanizawa Y, Fujisawa T, Nakamura Y. DFAST: a flexible prokaryotic genome annotation
-  pipeline for faster genome publication. *Bioinformatics* 2018;34(6):1037-1039.
-  <https://doi.org/10.1093/bioinformatics/btx713>
 - Ikeda S, Ono H, Ohta T, et al. TogoID: an exploratory ID converter to bridge
   biological datasets. *Bioinformatics* 2022;38(17):4194-4199.
   <https://doi.org/10.1093/bioinformatics/btac491>
