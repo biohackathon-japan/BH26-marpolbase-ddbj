@@ -34,11 +34,21 @@ authors_short: Tanizawa \& Fujisawa
 
 # Introduction
 
+The liverwort *Marchantia polymorpha* [@citesAsDataSource:Bowman2017] has drawn attention
+as a new-generation model plant in developmental and evolutionary biology, and a
+high-quality reference genome has been determined for it
+[@citesAsDataSource:Tanizawa2025]. For bioinformatics the species is attractive for a
+further reason: the community maintains an agreed gene nomenclature and gene identifier
+system, and researchers use that system when they describe genes in their papers. A gene
+mentioned in the literature can therefore be resolved to an identifier with far less
+ambiguity than in most species, which is an advantage both for extracting information from
+papers and for integrating data across sources.
+
 Our goal at the DBCLS BioHackathon 2026 was to turn **MarpolBase**
-[@citesAsDataSource:Tanizawa2025], the genome database of the liverwort
-*Marchantia polymorpha* [@citesAsDataSource:Bowman2017], into a knowledge base: to publish
-its gene, expression and literature data as RDF, to expose them through a SPARQL endpoint,
-and to make them reachable from AI agents through a Model Context Protocol (MCP) server.
+[@citesAsDataSource:Tanizawa2025], the genome database for this species, into a knowledge
+base: to publish its gene, expression and literature data as RDF, to expose them through a
+SPARQL endpoint, and to make them reachable from AI agents through a Model Context
+Protocol (MCP) server.
 
 The question behind this was practical. *M. polymorpha* is not indexed by the major
 cross-reference hubs, so it is not obvious that a species-specific resource can be linked
