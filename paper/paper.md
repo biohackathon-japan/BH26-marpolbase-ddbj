@@ -18,7 +18,7 @@ affiliations:
   - name: RIKEN, Japan
     ror: 01sjwvz98
     index: 1
-  - name: Bioinformation and DDBJ Center, National Institute of Genetics, Japan
+  - name: National Institute of Genetics, Japan
     ror: 02xg1m795
     index: 2
 date: 18 September 2026

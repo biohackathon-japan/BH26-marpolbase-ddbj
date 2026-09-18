@@ -15,7 +15,7 @@ authors:
 affiliations:
   - name: 理化学研究所
     index: 1
-  - name: 国立遺伝学研究所 生命情報・DDBJ センター
+  - name: 国立遺伝学研究所
     index: 2
 date: 2026年9月18日
 event: BH26JP
