@@ -9,12 +9,14 @@ tags:
   - 遺伝子発現
 authors:
   - name: 谷澤 靖洋 (Yasuhiro Tanizawa)
-    affiliation: 1
+    affiliation: 1, 2
   - name: 藤澤 貴智 (Takatomo Fujisawa)
-    affiliation: 1
+    affiliation: 2
 affiliations:
-  - name: 国立遺伝学研究所 生命情報・DDBJ センター
+  - name: 理化学研究所
     index: 1
+  - name: 国立遺伝学研究所 生命情報・DDBJ センター
+    index: 2
 date: 2026年9月18日
 event: BH26JP
 biohackathon_name: "DBCLS BioHackathon 2026"

@@ -9,14 +9,18 @@ tags:
   - Gene expression
 authors:
   - name: Yasuhiro Tanizawa
-    affiliation: 1
+    affiliation: 1, 2
     role: Conceptualization, Software, Writing – original draft
   - name: Takatomo Fujisawa
-    affiliation: 1
+    affiliation: 2
     role: Software, Writing – review & editing
 affiliations:
-  - name: Bioinformation and DDBJ Center, National Institute of Genetics, Japan
+  - name: RIKEN, Japan
+    ror: 01sjwvz98
     index: 1
+  - name: Bioinformation and DDBJ Center, National Institute of Genetics, Japan
+    ror: 02xg1m795
+    index: 2
 date: 18 September 2026
 cito-bibliography: paper.bib
 event: BH26JP
