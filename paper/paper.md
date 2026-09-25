@@ -48,8 +48,12 @@ mentioned in the literature can therefore be resolved to an identifier with far 
 ambiguity than in most species, which is an advantage both for extracting information from
 papers and for integrating data across sources.
 
-Our goal at the DBCLS BioHackathon 2026 was to turn **MarpolBase**
-[@citesAsDataSource:Tanizawa2025], the genome database for this species, into a knowledge
+MarpolBase, the genome database for the species, was published in *Plant and Cell
+Physiology* [@citesAsDataSource:Tanizawa2025], selected as an Editor's Choice, and
+accompanied by a commentary placing it among the community-building resources that make
+*Marchantia* an accessible model system [@citesAsAuthority:Boxall2026].
+
+Our goal at the DBCLS BioHackathon 2026 was to turn that database into a knowledge
 base: to publish its gene, expression and literature data as RDF, to expose them through a
 SPARQL endpoint, and to make them reachable from AI agents through a Model Context
 Protocol (MCP) server.
@@ -86,9 +90,18 @@ controlled-vocabulary resolution. A `run_sparql` tool and a `describe_schema` to
 also provided so that an agent can fall back to raw SPARQL when the typed tools are not
 enough.
 
+The literature layer is the part the gene identifier system pays off in. Because authors
+name genes with the community nomenclature, the papers can be mined for gene mentions at
+scale: **about 500 papers are linked to more than 1,200 genes**, each link carrying an
+evidence code (experimental, sequence or citation) and a role (subject, comparator or
+background), and marked as a core or a supporting reference. An LLM was also used to draft
+a function summary for each gene from the linked literature. Both the links and the
+summaries are in the RDF, so an agent retrieves them as data rather than re-reading the
+papers.
+
 ## Use cases
 
-We exercised the server with two analyses driven entirely from natural-language prompts.
+We exercised the server with three analyses driven entirely from natural-language prompts.
 
 In the first (Figure \ref{fig1}), the prompt *"tell me the conditions in which MpBNB is
 highly expressed"* was answered by retrieving the mean TPM of `MpBNB` across all 161
@@ -107,9 +120,20 @@ both salt-induced, and the induction is paralog-selective within every step.
 
 ![The bisbibenzyl route under salt stress. (a) Pathway schematic with enzyme steps coloured by the strongest induction among the expressed paralogs of that step. (b) log2 fold change of individual genes over a 100 mM NaCl time course, grouped by step. \label{fig2}](./figures/fig2_pathway.png)
 
+The third (Figure \ref{fig3}) asked for the genes on the sex chromosomes that are
+mentioned in the literature, drawn on the chromosomes. This one joins three layers at
+once — gene positions from the FALDO annotation, the curated gene–paper links, and the
+evidence and role codes on each link — and it is also a readable audit of the curation:
+of the 155 genes on chrU and chrV, 8 carry a curated reference, through 29 links over 23
+distinct papers. An absence in the figure means no curated link, not an absence of
+literature, which is the kind of distinction a resource has to make explicit if an agent
+is to reason over it.
+
+![Genes on the *M. polymorpha* sex chromosomes that carry a curated reference, assembled from one prompt. (a) chrU and chrV with all 155 genes, the named ones marked, and the 8 with a curated reference highlighted. (b) The 29 gene–paper links behind panel a, with MarpolBase's own evidence and role codes. \label{fig3}](./figures/fig3_sexchr.png)
+
 ## What MarpolBase and TogoMCP each contribute
 
-Working through these two analyses made the division of labour between a species-specific
+Working through these analyses made the division of labour between a species-specific
 resource and a cross-database hub concrete (Table 2).
 
 Only MarpolBase can supply measured expression across its 161 conditions, the
@@ -157,6 +181,29 @@ results outward to structures, reactions, compounds, orthologs in other species 
 sequence archives; and bridge the two with KO, GO and compound identifiers rather than
 with gene identifiers.
 
+# Connecting to the server
+
+The MCP server is a remote, streamable-HTTP endpoint at <https://marchantia.info/mcp>. It
+needs no local installation: a user adds the URL as a connector in a client that speaks
+MCP — in Claude, *Connectors → Add connector → Remote URL*; in the ChatGPT desktop app,
+*Settings → Plugins → add an MCP server* over streamable HTTP — and then asks for what
+they want in ordinary language. Nothing about the RDF shape or SPARQL syntax has to be
+learned first, which was the barrier the endpoint alone did not remove.
+
+We recommend adding TogoMCP (<https://togomcp.rdfportal.org/mcp>) alongside it. The two
+together are what produced Figure \ref{fig2}, and the division of labour between them is
+the subject of the two sections above.
+
+## Ongoing work
+
+MBEX, the MarpolBase expression database released in 2022, is being rebuilt: its content
+is growing from 340 to about 1,400 entries. The bottleneck there is not the data but the
+BioSample metadata that describes it, and we have built a tool that uses an LLM to assist
+that curation. The target is to have the expanded expression data in place for the
+international *Marchantia* workshop in Kobe in November 2026. Everything in this report
+therefore describes a resource that is still growing, and the 161 conditions used in
+Figure \ref{fig1} are a snapshot of it.
+
 # Discussion
 
 Publishing MarpolBase as RDF made it possible to link a species-specific plant genome
@@ -167,11 +214,13 @@ covering a species that the major cross-reference hubs do not index, the integra
 is not the gene identifier but the shared vocabularies the resource chooses to assign —
 in our case, above all, its own KO assignments.
 
-The MCP server also changed how the resource is used in practice. Both analyses in this
-report were driven from a natural-language prompt rather than from hand-written SPARQL,
+The MCP server also changed how the resource is used in practice. Every analysis in this
+report was driven from a natural-language prompt rather than from hand-written SPARQL,
 and the value of the typed tools was less in saving keystrokes than in carrying the
-condition metadata along with the numbers, so that the agent could report *where* a gene
-is expressed and not only *how much*.
+metadata along with the values — condition attributes with the expression numbers,
+evidence and role codes with the literature links — so that the agent could report *where*
+a gene is expressed and *on what grounds* a paper is attached to it, not only how much and
+how many.
 
 ## Acknowledgements
 
