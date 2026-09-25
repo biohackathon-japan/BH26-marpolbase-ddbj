@@ -90,14 +90,58 @@ controlled-vocabulary resolution. A `run_sparql` tool and a `describe_schema` to
 also provided so that an agent can fall back to raw SPARQL when the typed tools are not
 enough.
 
-The literature layer is the part the gene identifier system pays off in. Because authors
-name genes with the community nomenclature, the papers can be mined for gene mentions at
-scale: **about 500 papers are linked to more than 1,200 genes**, each link carrying an
-evidence code (experimental, sequence or citation) and a role (subject, comparator or
-background), and marked as a core or a supporting reference. An LLM was also used to draft
-a function summary for each gene from the linked literature. Both the links and the
+The literature layer is the part the gene identifier system pays off in, and it is
+described in its own section below. Both the gene–paper links and the LLM-drafted function
 summaries are in the RDF, so an agent retrieves them as data rather than re-reading the
 papers.
+
+## Linking the literature to the genes
+
+The gene–literature layer was assembled in a separate effort and imported into MarpolBase.
+The pipeline has four steps:
+
+1. Reference lists were parsed out of PDFs and each paper's DOI, PubMed ID and PMC ID
+   completed against CrossRef and the NCBI E-utilities. **1,399 papers** were surveyed.
+2. The full text of each paper — the abstract only where no full text could be obtained —
+   was read and the *Marchantia* genes it mentions identified. 3,020 of the resulting
+   records come from full text, 88 from full text plus supplementary files, and only 39
+   from an abstract alone.
+3. Each (gene, paper) pair was tagged on two axes: an **evidence** code (`experimental`,
+   `sequence` or `citation`) and a **role** (`subject`, `tool`, `comparator` or
+   `background`), together with a two-to-three-line function note taken from the text. A
+   pair that is both `experimental` and `subject` is a **core reference** — the paper
+   actually did experiments on that gene — and a gene page shows those by default, with
+   the peripheral mentions behind a "more" control.
+4. Gene identifiers were normalised to the MpTak_v7.1 assembly and per-gene JSON was
+   generated for MarpolBase to ingest.
+
+The result: **510 of the papers carry at least one gene link**, giving **3,147 gene–paper
+records** that name **1,455 distinct gene symbols and identifiers**. 1,105 of those resolve
+to a v7.1 gene ID, which is 85% of the records; 1,000 records over 530 genes are core
+references.
+
+## Why the linking was feasible at all
+
+This is where the point made in the introduction becomes concrete. The exercise works
+because the *Marchantia* community has a **gene nomenclature convention and a stable gene
+ID system, and both have been adopted widely enough that authors use them in their
+papers**. A gene mentioned in running text is therefore not a free-form string: `MpBNB`,
+`MpPAL1` and `Mp3g23300` belong to a registered vocabulary, so a mention can be matched
+against the nomenclature table and carried to an identifier.
+
+Two details show how much of the work that convention absorbs:
+
+- **Author-specific spellings still resolve.** A paper writing `MpCYCD;1` is matched
+  through the nomenclature entry that carries both that symbol and the identifier
+  `Mp8g17230`, so a naming style local to one paper does not break the link.
+- **Older papers keep their links.** A correspondence table from earlier assemblies to
+  MpTak_v7.1 lets papers that predate the current assembly resolve to current identifiers
+  — which is what makes a survey reaching back to the 1970s worth doing at all.
+
+Without that discipline the same reading effort would have produced ambiguous strings
+rather than links, and there would have been nothing to put in the RDF. The asymmetry is
+worth stating plainly: the curation was affordable here because the naming was settled
+first.
 
 ## Use cases
 
